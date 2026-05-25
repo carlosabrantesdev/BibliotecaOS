@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const pathname = usePathname();
   const { role, logout } = useAuth();
 
@@ -33,9 +33,9 @@ export default function Sidebar() {
   const routes = role === 'admin' ? adminRoutes : userRoutes;
 
   return (
-    <nav className="hidden md:flex flex-col h-screen w-64 bg-[#f2f4f6] border-r border-[#c6c6cd] py-2 flex-shrink-0 sticky top-0">
+    <nav className={`${isOpen ? 'flex' : 'hidden'} flex-col h-screen w-64 bg-[#f2f4f6] border-r border-[#c6c6cd] py-2 flex-shrink-0 sticky top-0 transition-all duration-300`}>
       <div className="px-6 mb-12 pt-2">
-        <h1 className="text-xl font-bold text-black">BibliotecaOS</h1>
+        <h1 className="text-xl font-bold text-black">Biblioteca</h1>
         <p className="text-xs text-[#45464d] uppercase tracking-widest mt-1">
           {role === 'admin' ? 'ADMINISTRAÇÃO' : 'PORTAL DO LEITOR'}
         </p>

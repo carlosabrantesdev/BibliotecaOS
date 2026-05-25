@@ -42,7 +42,7 @@ export default function Home() {
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-black text-[32px]">local_library</span>
-                <h1 className="text-3xl font-bold text-black tracking-tight">BibliotecaOS</h1>
+                <h1 className="text-3xl font-bold text-black tracking-tight">Biblioteca</h1>
               </div>
               <h2 className="text-2xl font-semibold text-[#191c1e]">Bem-vindo ao Portal do Leitor</h2>
               <p className="text-base text-[#45464d]">Insira suas credenciais institucionais para acessar o acervo digital e gerenciar suas reservas.</p>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -26,6 +27,7 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const isLoginPage = pathname === '/';
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
     <html
@@ -44,10 +46,10 @@ export default function RootLayout({
       </head>
       <body className={`min-h-full flex ${isLoginPage ? 'flex-col' : 'flex-row'}`} suppressHydrationWarning>
         <AuthProvider>
-          {!isLoginPage && <Sidebar />}
+          {!isLoginPage && <Sidebar isOpen={isSidebarOpen} />}
 
           <div className="flex-1 flex flex-col min-h-screen">
-            {!isLoginPage && <Topbar />}
+            {!isLoginPage && <Topbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />}
             <main className="flex-1">
               {children}
             </main>
