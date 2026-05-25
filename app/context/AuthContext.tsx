@@ -2,11 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 type UserRole = 'admin' | 'user' | null;
 
 interface AuthContextType {
   role: UserRole;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -16,30 +18,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>(null);
 
   useEffect(() => {
-    // Check if user is already logged in
     const storedRole = localStorage.getItem('userRole');
     if (storedRole === 'admin' || storedRole === 'user') {
       setRole(storedRole);
     }
   }, []);
 
-  const login = (email: string, password: string): boolean => {
-    // Simple simulation - in a real app, this would be an API call
-    if (email === 'admin@biblioteca.com' && password === 'admin123') {
-      setRole('admin');
-      localStorage.setItem('userRole', 'admin');
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha: password }),
+      });
+
+      if (!res.ok) return false;
+
+      const data = await res.json();
+      setRole(data.role as UserRole);
+      localStorage.setItem('userRole', data.role);
+      localStorage.setItem('token', data.token);
       return true;
-    } else if (email === 'usuario@biblioteca.com' && password === 'usuario123') {
-      setRole('user');
-      localStorage.setItem('userRole', 'user');
-      return true;
+    } catch {
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setRole(null);
     localStorage.removeItem('userRole');
+    localStorage.removeItem('token');
     window.location.href = '/';
   };
 

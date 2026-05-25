@@ -12,15 +12,17 @@ export default function Home() {
   const router = useRouter();
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // Attempt login
-    const success = login(email, password);
+    const success = await login(email, password);
+    setLoading(false);
 
     if (success) {
-      // Redirect to dashboard based on role
       const userRole = localStorage.getItem('userRole');
       if (userRole === 'admin') {
         router.push('/painel');
@@ -109,9 +111,9 @@ export default function Home() {
 
               {/* Actions */}
               <div className="flex flex-col gap-3 mt-4">
-                <button className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold text-sm py-3 rounded-sm hover:opacity-90 transition-opacity shadow-sm" type="submit">
-                  <span>Entrar</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                <button className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold text-sm py-3 rounded-sm hover:opacity-90 transition-opacity shadow-sm disabled:opacity-60" type="submit" disabled={loading}>
+                  <span>{loading ? 'Entrando...' : 'Entrar'}</span>
+                  {!loading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
                 </button>
                 <a className="w-full flex items-center justify-center bg-white border border-[#76777d] text-black font-semibold text-sm py-3 rounded-sm hover:bg-[#f2f4f6] transition-colors text-center" href="#">
                   Criar conta
