@@ -1,11 +1,35 @@
-import Image from "next/image";
-import Topbar from "../components/Topbar";
+'use client';
+
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Catalogo() {
+  const { role } = useAuth();
+  const router = useRouter();
+
+  // Redirect if not logged in or wrong role
+  useEffect(() => {
+    if (role === null) {
+      router.push('/');
+    }
+  }, [role, router]);
+
+  if (role === null) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#f7f9fb] text-[#191c1e]">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0058be] mb-4"></div>
+            <p className="text-[#45464d]">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[#f7f9fb] text-[#191c1e]">
-      <Topbar />
-
       {/* Canvas */}
       <div className="p-8 flex-1 bg-[#f7f9fb]">
         {/* Page Header & Primary Action */}
@@ -62,32 +86,32 @@ export default function Catalogo() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
             {
-              title: "Estrutura e Interpretação de Programas de Computador",
-              author: "Abelson, Sussman",
+              title: "Nome do livro",
+              author: "Autor do livro",
               status: "Disponível",
               statusColor: "bg-[#e8f5e9] text-[#2e7d32] border-[#c8e6c9]",
-              img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAlismR5IYflzAlj6JzEIYp14GUYHQP5qotoJTxyvAkRg25q7iffpSeaZW4oFjQvOESpXY80a-7n-wsu19S86hnEbKPDHCBupbSl_9fEPzcc-qnY-UPFdehMQ_sMlj-Le-GjFeFv4uewvw537-HTfnRVXR-__BR6v-1_CzaNzaZlJMBq4lRX5JtvrkCF-8Rk1grdsJOydwnFukmbUklydfs2MFfxuBAz8g81Qbrs3ecF4ORD055blnO3zaQ0E8SJXjl8cTYWBKUglI"
+              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
             },
             {
-              title: "O Declínio e Queda do Império Romano",
-              author: "Edward Gibbon",
+              title: "Nome do livro",
+              author: "Autor do livro",
               status: "Emprestado",
               statusColor: "bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]",
-              img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCHLZzlQ5hGdxHwoPWFSyCsF0WKlv4629nXbyqiIZdenauGlcf2lFIF2SrIKzWfxnPQ_rHgVHj06W_7UclyQ6ouDOlgGqPbAGcSQYw9VtxLyPoJxkJX_ebg65UQWMtYDYKF0UxZNhSwYHwjzZzy8pIhaLE6uQcbLREH4RZU1YmHDrQ062_-RSaH6ly41WuY2DngVys2ror3ppdTJIfk8TojtusoTvpmm7oQovb5YuWQOImAW_WQk1Tn7nVKdZaN-zFaEVW26ppwZwQ"
+              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
             },
             {
-              title: "Princípios de Análise Matemática",
-              author: "Walter Rudin",
-              status: "Reservado",
-              statusColor: "bg-[#fff3e0] text-[#ef6c00] border-[#ffe0b2]",
-              img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBix-vzTLjNuHji_NUgxOYKJ7P0ncIaKxn1Xpy3xQVpiNXgG4TVkTFogWXWSmaVPQkYQt0R0GSm_W3T1ygORw65KiZi4kRiQeGNTBLKrkDqHpfgnvHvMu3BKIA7JnVjfVlsPoXEC5xqHwiNewngzc-GpEsnx2j_jDSoq6rPin27T23QzpwupJyA2itPRNcrTtNNXbjiobYOi6cGnPnhQhPiWfd6IMFYLOzAYi0gbhvueFnEGqWBUUY1blZuFN5PTwrv76p4meEFtzA"
+              title: "Nome do livro",
+              author: "Autor do livro",
+              status: "Emprestado",
+              statusColor: "bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]",
+              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
             },
             {
-              title: "Crítica da Razão Pura",
-              author: "Immanuel Kant",
-              status: "Disponível",
-              statusColor: "bg-[#e8f5e9] text-[#2e7d32] border-[#c8e6c9]",
-              img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBF6XxZu0MMT-vXPWxEis0gZeZPPNRs6I6x8s8ShRg-6GeKmaajyJePhGO9DAF0sCieaEWl-Xk7db1tHY5Y18wZPtle8AcRj7AKmmELN0GXeIlgVIEez7GwsQdZ8czpRM7rLGmwPWlDI22BROnJlhD4qzxAXYNzhCwflydXFX-vF1z4ymN_vzJGxzzy6yphqn5RpR9Ye6ze5nd1eZrixSGvqudifDHlnnA__esb0o42XngiwsF6uqpQpn_c2R_GJeV0ynrwh5Tz1Ks"
+              title: "Nome do livro",
+              author: "Autor do livro",
+              status: "Emprestado",
+              statusColor: "bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]",
+              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
             }
           ].map((book, idx) => (
             <div key={idx} className="bg-white border border-[#c6c6cd] rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
