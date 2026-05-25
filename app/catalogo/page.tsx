@@ -1,21 +1,40 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+const COVER_PLACEHOLDER = 'https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg';
+
+interface Livro {
+  id: number;
+  titulo: string;
+  autor: string;
+  disponivel: boolean;
+}
 
 export default function Catalogo() {
   const { role } = useAuth();
   const router = useRouter();
+  const [livros, setLivros] = useState<Livro[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Redirect if not logged in or wrong role
   useEffect(() => {
     if (role === null) {
       router.push('/');
+      return;
     }
+    const token = localStorage.getItem('token');
+    fetch(`${API_URL}/api/livros`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setLivros(data))
+      .finally(() => setLoading(false));
   }, [role, router]);
 
-  if (role === null) {
+  if (role === null || loading) {
     return (
       <div className="flex flex-col min-h-screen bg-[#f7f9fb] text-[#191c1e]">
         <div className="flex-1 flex items-center justify-center">
@@ -84,60 +103,44 @@ export default function Catalogo() {
 
         {/* Grid Layout for Books */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[
-            {
-              title: "Nome do livro",
-              author: "Autor do livro",
-              status: "Disponível",
-              statusColor: "bg-[#e8f5e9] text-[#2e7d32] border-[#c8e6c9]",
-              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
-            },
-            {
-              title: "Nome do livro",
-              author: "Autor do livro",
-              status: "Emprestado",
-              statusColor: "bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]",
-              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
-            },
-            {
-              title: "Nome do livro",
-              author: "Autor do livro",
-              status: "Emprestado",
-              statusColor: "bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]",
-              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
-            },
-            {
-              title: "Nome do livro",
-              author: "Autor do livro",
-              status: "Emprestado",
-              statusColor: "bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]",
-              img: "https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg"
-            }
-          ].map((book, idx) => (
-            <div key={idx} className="bg-white border border-[#c6c6cd] rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="h-48 bg-[#e6e8ea] relative flex items-center justify-center border-b border-[#c6c6cd] overflow-hidden">
-                <img alt="Capa do livro" className="w-full h-full object-cover opacity-90 mix-blend-multiply" src={book.img} />
-                <div className={`absolute top-3 right-3 px-2 py-1 rounded text-xs font-semibold border ${book.statusColor}`}>
-                  {book.status}
-                </div>
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="text-lg font-bold text-black mb-1 line-clamp-2">{book.title}</h3>
-                <p className="text-sm text-[#45464d] mb-4">{book.author}</p>
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-[#f2f4f6]">
-                  <button className="text-sm font-semibold text-[#0058be] hover:text-[#0b1c30] transition-colors">Ver Detalhes</button>
-                  <div className="flex space-x-2">
-                    <button className="text-[#76777d] hover:text-black transition-colors p-1" title="Editar">
-                      <span className="material-symbols-outlined text-[20px]">edit</span>
-                    </button>
-                    <button className="text-[#76777d] hover:text-red-600 transition-colors p-1" title="Remover">
-                      <span className="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
+          {livros.length === 0
+            ? (
+              <p className="text-[#45464d] col-span-4 py-8 text-center">
+                Não há livros cadastrados no momento.
+              </p>
+            )
+            : livros.map((livro) => {
+              const statusColor = livro.disponivel
+                ? 'bg-[#e8f5e9] text-[#2e7d32] border-[#c8e6c9]'
+                : 'bg-[#ffdad6] text-[#93000a] border-[#ffb4ab]';
+              const statusLabel = livro.disponivel ? 'Disponível' : 'Emprestado';
+              return (
+                <div key={livro.id} className="bg-white border border-[#c6c6cd] rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                  <div className="h-48 bg-[#e6e8ea] relative flex items-center justify-center border-b border-[#c6c6cd] overflow-hidden">
+                    <img alt={`Capa de ${livro.titulo}`} className="w-full h-full object-cover opacity-90 mix-blend-multiply" src={COVER_PLACEHOLDER} />
+                    <div className={`absolute top-3 right-3 px-2 py-1 rounded text-xs font-semibold border ${statusColor}`}>
+                      {statusLabel}
+                    </div>
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-lg font-bold text-black mb-1 line-clamp-2">{livro.titulo}</h3>
+                    <p className="text-sm text-[#45464d] mb-4">{livro.autor}</p>
+                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-[#f2f4f6]">
+                      <button className="text-sm font-semibold text-[#0058be] hover:text-[#0b1c30] transition-colors">Ver Detalhes</button>
+                      <div className="flex space-x-2">
+                        <button className="text-[#76777d] hover:text-black transition-colors p-1" title="Editar">
+                          <span className="material-symbols-outlined text-[20px]">edit</span>
+                        </button>
+                        <button className="text-[#76777d] hover:text-red-600 transition-colors p-1" title="Remover">
+                          <span className="material-symbols-outlined text-[20px]">delete</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          }
         </div>
 
         {/* Pagination */}
