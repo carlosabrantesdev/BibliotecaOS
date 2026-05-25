@@ -5,17 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function Relatorios() {
-  const { role } = useAuth();
+  const { role, authLoaded } = useAuth();
   const router = useRouter();
 
   // Redirect if not logged in or wrong role
   useEffect(() => {
-    if (role === null) {
-      router.push('/');
-    }
-  }, [role, router]);
+    if (!authLoaded) return;
+    if (role === null) router.push('/');
+  }, [role, authLoaded, router]);
 
-  if (role === null) {
+  if (!authLoaded || role === null) {
     return (
       <div className="flex flex-col min-h-screen bg-[#f7f9fb] text-[#191c1e]">
         <div className="flex-1 flex items-center justify-center">

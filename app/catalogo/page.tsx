@@ -15,12 +15,13 @@ interface Livro {
 }
 
 export default function Catalogo() {
-  const { role } = useAuth();
+  const { role, authLoaded } = useAuth();
   const router = useRouter();
   const [livros, setLivros] = useState<Livro[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!authLoaded) return;
     if (role === null) {
       router.push('/');
       return;
@@ -32,9 +33,9 @@ export default function Catalogo() {
       .then((res) => res.json())
       .then((data) => setLivros(data))
       .finally(() => setLoading(false));
-  }, [role, router]);
+  }, [role, authLoaded, router]);
 
-  if (role === null || loading) {
+  if (!authLoaded || loading) {
     return (
       <div className="flex flex-col min-h-screen bg-[#f7f9fb] text-[#191c1e]">
         <div className="flex-1 flex items-center justify-center">

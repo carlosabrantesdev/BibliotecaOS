@@ -8,6 +8,7 @@ type UserRole = 'admin' | 'user' | null;
 
 interface AuthContextType {
   role: UserRole;
+  authLoaded: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -16,12 +17,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
     const storedRole = localStorage.getItem('userRole');
     if (storedRole === 'admin' || storedRole === 'user') {
       setRole(storedRole);
     }
+    setAuthLoaded(true);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -52,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ role, login, logout }}>
+    <AuthContext.Provider value={{ role, authLoaded, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
