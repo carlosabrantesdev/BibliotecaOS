@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# docs locais (não versionados)
-docs/
+# docs locais (PDFs e markdowns versionados)
+# docs/
