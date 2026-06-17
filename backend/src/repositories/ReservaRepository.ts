@@ -3,18 +3,18 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const ReservaRepository = {
-  criar: (data: { usuarioId: number, livroId: number, dataPrazo: Date }) => 
-    prisma.reserva.create({ data }),
+  criar: async (data: { usuarioId: number, livroId: number, dataPrazo: Date }) => 
+    await prisma.reserva.create({ data }),
 
-  listarPorUsuario: (usuarioId: number) => 
-    prisma.reserva.findMany({
+  listarPorUsuario: async (usuarioId: number) => 
+    await prisma.reserva.findMany({
       where: { usuarioId },
       include: { livro: true },
       orderBy: { dataReserva: 'desc' }
     }),
 
-  atualizarStatus: (id: number, status: string) => 
-    prisma.reserva.update({
+  atualizarStatus: async (id: number, status: string) => 
+    await prisma.reserva.update({
       where: { id },
       data: { status }
     }),

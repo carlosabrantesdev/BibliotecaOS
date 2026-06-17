@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const COVER_PLACEHOLDER = 'https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg';
 
 interface Livro {
@@ -12,6 +12,7 @@ interface Livro {
   titulo: string;
   autor: string;
   disponivel: boolean;
+  linkImagem?: string;
 }
 
 export default function Catalogo() {
@@ -32,6 +33,7 @@ export default function Catalogo() {
     })
       .then((res) => res.json())
       .then((data) => setLivros(data))
+      .catch((err) => console.error('Erro ao carregar livros:', err))
       .finally(() => setLoading(false));
   }, [role, authLoaded, router]);
 
@@ -75,16 +77,6 @@ export default function Catalogo() {
               </div>
             </div>
             <div className="md:col-span-3">
-              <label className="block text-sm font-semibold text-[#45464d] mb-2">Disciplina / Gênero</label>
-              <select className="w-full px-4 py-3 bg-[#f7f9fb] border border-[#c6c6cd] rounded focus:outline-none focus:border-[#0058be] focus:ring-1 focus:ring-[#0058be] text-black text-base appearance-none">
-                <option>Todas as Disciplinas</option>
-                <option>Ciência da Computação</option>
-                <option>Filosofia</option>
-                <option>Matemática</option>
-                <option>História</option>
-              </select>
-            </div>
-            <div className="md:col-span-3">
               <label className="block text-sm font-semibold text-[#45464d] mb-2">Status</label>
               <select className="w-full px-4 py-3 bg-[#f7f9fb] border border-[#c6c6cd] rounded focus:outline-none focus:border-[#0058be] focus:ring-1 focus:ring-[#0058be] text-black text-base appearance-none">
                 <option>Qualquer Status</option>
@@ -93,11 +85,6 @@ export default function Catalogo() {
                 <option>Reservado</option>
                 <option>Manutenção</option>
               </select>
-            </div>
-            <div className="md:col-span-1 flex justify-end">
-              <button className="p-3 border border-[#c6c6cd] rounded text-black hover:bg-[#f2f4f6] transition-colors w-full flex justify-center items-center">
-                <span className="material-symbols-outlined">tune</span>
-              </button>
             </div>
           </div>
         </div>
@@ -118,7 +105,7 @@ export default function Catalogo() {
               return (
                 <div key={livro.id} className="bg-white border border-[#c6c6cd] rounded-lg overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                   <div className="h-48 bg-[#e6e8ea] relative flex items-center justify-center border-b border-[#c6c6cd] overflow-hidden">
-                    <img alt={`Capa de ${livro.titulo}`} className="w-full h-full object-cover opacity-90 mix-blend-multiply" src={COVER_PLACEHOLDER} />
+                    <img alt={`Capa de ${livro.titulo}`} className="w-full h-full object-cover opacity-90 mix-blend-multiply" src={livro.linkImagem || COVER_PLACEHOLDER} />
                     <div className={`absolute top-3 right-3 px-2 py-1 rounded text-xs font-semibold border ${statusColor}`}>
                       {statusLabel}
                     </div>
@@ -142,20 +129,6 @@ export default function Catalogo() {
               );
             })
           }
-        </div>
-
-        {/* Pagination */}
-        <div className="mt-12 flex justify-center items-center space-x-2">
-          <button className="p-2 border border-[#c6c6cd] rounded text-[#45464d] hover:bg-white hover:text-black transition-colors disabled:opacity-50">
-            <span className="material-symbols-outlined">chevron_left</span>
-          </button>
-          <button className="w-10 h-10 border border-[#0058be] bg-[#d8e2ff]/10 text-[#0058be] text-sm font-semibold rounded flex items-center justify-center">1</button>
-          <button className="w-10 h-10 border border-[#c6c6cd] text-black text-sm font-semibold rounded hover:bg-white transition-colors flex items-center justify-center">2</button>
-          <button className="w-10 h-10 border border-[#c6c6cd] text-black text-sm font-semibold rounded hover:bg-white transition-colors flex items-center justify-center">3</button>
-          <span className="px-2 text-[#76777d]">...</span>
-          <button className="p-2 border border-[#c6c6cd] rounded text-[#45464d] hover:bg-white hover:text-black transition-colors">
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
         </div>
       </div>
     </div>

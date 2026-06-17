@@ -15,17 +15,7 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
           <span className="material-symbols-outlined">menu</span>
         </button>
       </div>
-      <div className="flex items-center space-x-6">
-        <button className="text-[#45464d] hover:text-black transition-colors hover:bg-[#f2f4f6] p-2 rounded-full cursor-pointer">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
-        <button className="text-[#45464d] hover:text-black transition-colors hover:bg-[#f2f4f6] p-2 rounded-full cursor-pointer">
-          <span className="material-symbols-outlined">settings</span>
-        </button>
-         <button className="text-[#45464d] hover:text-black transition-colors hover:bg-[#f2f4f6] p-2 rounded-full cursor-pointer">
-          <span className="material-symbols-outlined">account_circle</span>
-        </button>
-      </div>
+
     </header>
   );
 }

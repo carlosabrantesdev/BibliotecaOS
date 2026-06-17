@@ -42,3 +42,4 @@ model Reserva {
   livro      Livro    @relation(fields: [livroId], references: [id])
 
   @@map("reservas")
+}

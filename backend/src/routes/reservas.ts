@@ -20,11 +20,15 @@ router.post('/', autenticar, async (req, res) => {
 
 router.get('/minhas', autenticar, async (req, res) => {
   try {
-    const usuarioId = (req as any).usuario.id;
+    const usuarioId = (req as any).usuario?.id;
+    if (!usuarioId) {
+      return res.status(401).json({ message: 'Usuário não identificado no token' });
+    }
     const reservas = await ReservaService.listarMinhasReservas(usuarioId);
     res.json(reservas);
   } catch (e: any) {
-    res.status(500).json({ message: e.message });
+    console.error('Erro na rota /api/reservas/minhas:', e);
+    res.status(500).json({ message: e.message || 'Erro interno ao buscar reservas' });
   }
 });
 

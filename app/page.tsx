@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from './context/AuthContext';
 import Footer from "./components/Footer";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 export default function Home() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,62 +23,120 @@ export default function Home() {
     setError('');
     setLoading(true);
 
-    const success = await login(email, password);
-    setLoading(false);
+    if (isLogin) {
+      // Lógica de Login
+      const success = await login(email, password);
+      setLoading(false);
 
-    if (success) {
-      const userRole = localStorage.getItem('userRole');
-      if (userRole === 'admin') {
-        router.push('/painel');
+      if (success) {
+        const userRole = localStorage.getItem('userRole');
+        if (userRole === 'admin') {
+          router.push('/painel');
+        } else {
+          router.push('/explorar');
+        }
       } else {
-        router.push('/explorar');
+        setError('Credenciais inválidas. Por favor, tente novamente.');
       }
     } else {
-      setError('Credenciais inválidas. Por favor, tente novamente.');
+      // Lógica de Registro
+      try {
+        const res = await fetch(`${API_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, senha: password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.erro || 'Erro ao criar conta');
+        }
+
+        // Login automático após registro bem-sucedido
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', data.role);
+        
+        setLoading(false);
+        router.push('/explorar');
+      } catch (err: any) {
+        setLoading(false);
+        setError(err.message);
+      }
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f7f9fb] text-[#191c1e] antialiased">
       <main className="flex-grow flex w-full">
-        {/* Left Side: Form */}
+        {/* Lado Esquerdo: Formulário */}
         <section className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8 relative z-10 bg-[#f7f9fb]">
           <div className="w-full max-w-[420px] flex flex-col gap-12">
-            {/* Header */}
+            
+            {/* Cabeçalho */}
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-black text-[32px]">local_library</span>
                 <h1 className="text-3xl font-bold text-black tracking-tight">Biblioteca</h1>
               </div>
-              <h2 className="text-2xl font-semibold text-[#191c1e]">Bem-vindo ao Portal do Leitor</h2>
-              <p className="text-base text-[#45464d]">Insira suas credenciais institucionais para acessar o acervo digital e gerenciar suas reservas.</p>
+              <h2 className="text-2xl font-semibold text-[#191c1e]">
+                {isLogin ? 'Bem-vindo ao Portal do Leitor' : 'Crie sua Conta de Leitor'}
+              </h2>
+              <p className="text-base text-[#45464d]">
+                {isLogin 
+                  ? 'Insira suas credenciais institucionais para acessar o acervo digital e gerenciar suas reservas.' 
+                  : 'Junte-se à nossa comunidade e comece a explorar nosso acervo digital agora mesmo.'}
+              </p>
             </header>
 
-            {/* Login Info */}
-            <div className="bg-[#e6f0ff] border border-[#c6d7ff] rounded-sm p-4 text-sm">
-              <p className="font-semibold mb-2">Credenciais de teste:</p>
-              <p><strong>Administrador:</strong> admin@biblioteca.com / admin123</p>
-              <p><strong>Usuário:</strong> usuario@biblioteca.com / usuario123</p>
-            </div>
+            {isLogin && (
+              <div className="bg-[#e6f0ff] border border-[#c6d7ff] rounded-sm p-4 text-sm">
+                <p className="font-semibold mb-2">Credenciais de teste:</p>
+                <p><strong>Administrador:</strong> admin@biblioteca.com / admin123</p>
+                <p><strong>Usuário:</strong> usuario@biblioteca.com / usuario123</p>
+              </div>
+            )}
 
-            {/* Login Form */}
+            {/* Formulário */}
             <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-              {/* Error Message */}
+              
+              {/* Mensagem de Erro */}
               {error && (
                 <div className="bg-[#ffebee] border border-[#ffcdd2] text-[#c62828] p-3 rounded-sm text-sm">
                   {error}
                 </div>
               )}
 
-              {/* Email Input */}
+              {/* Input: Nome (Apenas Registro) */}
+              {!isLogin && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-[#191c1e]" htmlFor="nome">Nome Completo</label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6c6cd] pointer-events-none">person</span>
+                    <input
+                      className="w-full bg-white border border-[#c6c6cd] rounded-sm py-3 pl-10 pr-4 text-base text-[#191c1e] placeholder:text-[#c6c6cd] focus:outline-none focus:border-[#0058be] focus:ring-1 focus:ring-[#0058be] transition-colors shadow-sm"
+                      id="nome"
+                      placeholder="Seu nome completo"
+                      required
+                      type="text"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Input: Email */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-[#191c1e]" htmlFor="email">E-mail Institucional</label>
+                <label className="text-sm font-semibold text-[#191c1e]" htmlFor="email">
+                  {isLogin ? 'E-mail Institucional' : 'E-mail'}
+                </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#c6c6cd] pointer-events-none">mail</span>
                   <input
                     className="w-full bg-white border border-[#c6c6cd] rounded-sm py-3 pl-10 pr-4 text-base text-[#191c1e] placeholder:text-[#c6c6cd] focus:outline-none focus:border-[#0058be] focus:ring-1 focus:ring-[#0058be] transition-colors shadow-sm"
                     id="email"
-                    placeholder="nome.sobrenome@instituicao.edu.br"
+                    placeholder={isLogin ? "nome.sobrenome@instituicao.edu.br" : "seuemail@exemplo.com"}
                     required
                     type="email"
                     value={email}
@@ -83,7 +145,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Password Input */}
+              {/* Input: Senha */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-[#191c1e]" htmlFor="password">Senha</label>
                 <div className="relative">
@@ -100,30 +162,30 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Options Row */}
-              <div className="flex items-center justify-between mt-[-8px]">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input className="w-4 h-4 rounded-sm border-[#c6c6cd] text-[#0058be] focus:ring-[#0058be] focus:ring-offset-0 bg-white" type="checkbox"/>
-                  <span className="text-base text-[#45464d] group-hover:text-[#191c1e] transition-colors">Manter conectado</span>
-                </label>
-                <a className="text-sm font-semibold text-[#0058be] hover:underline underline-offset-4 decoration-[#0058be]/50 transition-all" href="#">Esqueceu a senha?</a>
-              </div>
-
-              {/* Actions */}
+              {/* Ações / Botões */}
               <div className="flex flex-col gap-3 mt-4">
-                <button className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold text-sm py-3 rounded-sm hover:opacity-90 transition-opacity shadow-sm disabled:opacity-60" type="submit" disabled={loading}>
-                  <span>{loading ? 'Entrando...' : 'Entrar'}</span>
+                <button 
+                  className="w-full flex items-center justify-center gap-2 bg-black text-white font-semibold text-sm py-3 rounded-sm hover:opacity-90 transition-opacity shadow-sm disabled:opacity-60" 
+                  type="submit" 
+                  disabled={loading}
+                >
+                  <span>{loading ? 'Processando...' : isLogin ? 'Entrar' : 'Cadastrar'}</span>
                   {!loading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
                 </button>
-                <a className="w-full flex items-center justify-center bg-white border border-[#76777d] text-black font-semibold text-sm py-3 rounded-sm hover:bg-[#f2f4f6] transition-colors text-center" href="#">
-                  Criar conta
-                </a>
+                
+                <button 
+                  onClick={() => setIsLogin(!isLogin)} 
+                  className="w-full flex items-center justify-center bg-white border border-[#76777d] text-black font-semibold text-sm py-3 rounded-sm hover:bg-[#f2f4f6] transition-colors text-center" 
+                  type="button"
+                >
+                  {isLogin ? 'Criar conta' : 'Voltar para Login'}
+                </button>
               </div>
             </form>
           </div>
         </section>
 
-        {/* Right Side: Imagery (Hidden on Mobile) */}
+        {/* Lado Direito: Imagem (Escondida no Mobile) */}
         <section className="hidden lg:block lg:w-1/2 relative bg-[#e6e8ea] border-l border-[#c6c6cd] overflow-hidden">
           <img
             alt="Academic Library"
@@ -133,6 +195,9 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-tr from-[#f2f4f6]/80 via-transparent to-transparent pointer-events-none"></div>
         </section>
       </main>
+
+      {/* Footer renderizado aqui */}
+      <Footer />
     </div>
   );
 }

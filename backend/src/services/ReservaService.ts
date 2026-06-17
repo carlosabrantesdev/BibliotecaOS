@@ -26,11 +26,22 @@ export const ReservaService = {
     return reserva;
   },
 
-  listarMinhasReservas: (usuarioId: number) => 
-    ReservaRepository.listarPorUsuario(usuarioId),
+  listarMinhasReservas: async (usuarioId: number) => {
+    try {
+      return await ReservaRepository.listarPorUsuario(usuarioId);
+    } catch (error) {
+      console.error('Erro em ReservaService.listarMinhasReservas:', error);
+      throw error;
+    }
+  },
 
   confirmarRetirada: async (reservaId: number) => {
-    return ReservaRepository.atualizarStatus(reservaId, 'CONCLUIDA');
+    const reserva = await ReservaRepository.atualizarStatus(reservaId, 'CONCLUIDA');
+    
+    // O livro continua indisponível pois agora está com o usuário (emprestado)
+    // Se houvesse um sistema de empréstimo separado, aqui faríamos a transição.
+    
+    return reserva;
   },
 
   cancelarReserva: (reservaId: number) => 

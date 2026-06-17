@@ -8,7 +8,7 @@ interface Reservation {
   livro: {
     titulo: string;
     autor: string;
-    capaUrl: string;
+    linkImagem: string;
   };
   dataReserva: string;
   dataPrazo: string;
@@ -21,31 +21,71 @@ export default function ReservasPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchReservations() {
-      if (!authLoaded) return;
+  async function fetchReservations() {
+    if (!authLoaded) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3001/api/reservas/minhas', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) throw new Error('Erro ao carregar reservas');
       
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:3333/api/reservas/minhas', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!res.ok) throw new Error('Erro ao carregar reservas');
-        
-        const data = await res.json();
-        setReservations(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      const data = await res.json();
+      setReservations(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     fetchReservations();
   }, [authLoaded]);
+
+  async function handleConfirmarRetirada(id: number) {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:3001/api/reservas/${id}/confirmar`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!res.ok) throw new Error('Erro ao confirmar retirada');
+      
+      await fetchReservations();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  }
+
+  async function handleCancelarReserva(id: number) {
+    if (!confirm('Tem certeza que deseja cancelar esta reserva?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:3001/api/reservas/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!res.ok) throw new Error('Erro ao cancelar reserva');
+      
+      await fetchReservations();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  }
 
   if (loading) {
     return (
@@ -81,16 +121,6 @@ export default function ReservasPage() {
               <h2 className="text-4xl font-bold text-black mb-2 tracking-tight">Minhas Reservas</h2>
               <p className="text-lg text-gray-600">Gerencie seus livros reservados e aguardando retirada.</p>
             </div>
-            <div className="flex gap-3">
-              <button className="px-4 py-2 bg-white text-black font-semibold text-sm rounded border border-gray-300 hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-sm">
-                <span className="material-symbols-outlined text-[18px]">filter_list</span>
-                Filtrar
-              </button>
-              <button className="px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm">
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Nova Reserva
-              </button>
-            </div>
           </div>
         </section>
 
@@ -116,7 +146,7 @@ export default function ReservasPage() {
                   <img 
                     alt={`Capa de ${res.livro.titulo}`} 
                     className="w-full h-full object-cover" 
-                    src={res.livro.capaUrl || 'https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg'} 
+                    src={res.livro.linkImagem || 'https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg'} 
                   />
                 </div>
 
@@ -145,10 +175,18 @@ export default function ReservasPage() {
 
                 {/* Actions */}
                 <div className="hidden lg:flex gap-2">
-                  <button className="px-4 py-2 bg-black text-white rounded font-semibold text-sm hover:opacity-90 transition-opacity">
-                    Confirmar Retirada
-                  </button>
-                  <button className="px-4 py-2 border border-[#76777d] text-black rounded font-semibold text-sm hover:bg-[#f2f4f6] transition-colors">
+                  {res.status === 'PENDENTE' && (
+                    <button 
+                      onClick={() => handleConfirmarRetirada(res.id)}
+                      className="px-4 py-2 bg-black text-white rounded font-semibold text-sm hover:opacity-90 transition-opacity"
+                    >
+                      Confirmar Retirada
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => handleCancelarReserva(res.id)}
+                    className="px-4 py-2 border border-[#76777d] text-black rounded font-semibold text-sm hover:bg-[#f2f4f6] transition-colors"
+                  >
                     Cancelar
                   </button>
                 </div>
@@ -168,12 +206,6 @@ export default function ReservasPage() {
             <h3 className="text-xl font-bold text-black">Histórico Recente</h3>
             <a className="text-sm font-semibold text-[#0058be] hover:underline" href="#">Ver todo o histórico</a>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -186,7 +218,9 @@ export default function ReservasPage() {
                 </tr>
               </thead>
               <tbody className="text-sm text-black">
-                {past_reservations.map((past_res) => (
+                {reservations
+                  .filter(res => res.status === 'CONCLUIDA' || res.status === 'CANCELADA')
+                  .map((past_res) => (
                   <tr 
                     key={past_res.id} 
                     className="border-b border-[#c6c6cd]/50 last:border-none hover:bg-[#f2f4f6] transition-colors"
@@ -195,19 +229,19 @@ export default function ReservasPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-14 bg-[#e0e3e5] rounded overflow-hidden shrink-0">
                           <img 
-                            alt={`Capa de ${past_res.title}`} 
+                            alt={`Capa de ${past_res.livro.titulo}`} 
                             className="w-full h-full object-cover" 
-                            src={past_res.cover} 
+                            src={past_res.livro.linkImagem || 'https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg'} 
                           />
                         </div>
                         <div>
-                          <p className="font-semibold text-black">{past_res.title}</p>
-                          <p className="text-[#45464d] text-[12px]">{past_res.author}</p>
+                          <p className="font-semibold text-black">{past_res.livro.titulo}</p>
+                          <p className="text-[#45464d] text-[12px]">{past_res.livro.autor}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-[#45464d]">{past_res.dateReserved}</td>
-                    <td className="px-6 py-4 text-[#45464d]">{past_res.deadline}</td>
+                    <td className="px-6 py-4 text-[#45464d]">{new Date(past_res.dataReserva).toLocaleDateString('pt-BR')}</td>
+                    <td className="px-6 py-4 text-[#45464d]">{new Date(past_res.dataPrazo).toLocaleDateString('pt-BR')}</td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 bg-[#f2f4f6] text-[#45464d] rounded text-[12px] font-semibold">
                         {past_res.status}
@@ -224,7 +258,7 @@ export default function ReservasPage() {
             </table>
           </div>
         </div>
-        </div>
+      </div>
     </div>
   );
 }

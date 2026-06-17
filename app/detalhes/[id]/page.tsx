@@ -55,11 +55,13 @@ export default function DetalhesPage() {
         body: JSON.stringify({ livroId: livro?.id }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         alert('Livro reservado com sucesso!');
         router.push('/reservas');
       } else {
-        alert('Erro ao realizar reserva.');
+        alert(`Erro ao realizar reserva: ${data.message || 'Erro desconhecido'}`);
       }
     } catch (e) {
       alert('Erro de conexão com o servidor.');

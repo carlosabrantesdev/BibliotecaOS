@@ -3,6 +3,8 @@ import cors from 'cors';
 import authRoutes from './routes/auth';
 import livrosRoutes from './routes/livros';
 import reservasRoutes from './routes/reservas';
+import dashboardRoutes from './routes/dashboard';
+import usuariosRoutes from './routes/usuarios';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,6 +15,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/livros', livrosRoutes);
 app.use('/api/reservas', reservasRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 
 app.get('/api/health', (_, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
