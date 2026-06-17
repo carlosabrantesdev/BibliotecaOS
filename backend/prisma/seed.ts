@@ -20,12 +20,12 @@ async function main() {
   });
 
   const livros = [
-    { titulo: 'Dom Casmurro', autor: 'Machado de Assis', disponivel: true },
-    { titulo: 'Capitães da Areia', autor: 'Jorge Amado', disponivel: false },
-    { titulo: 'A Hora da Estrela', autor: 'Clarice Lispector', disponivel: true },
-    { titulo: 'Grande Sertão: Veredas', autor: 'João Guimarães Rosa', disponivel: true },
-    { titulo: 'Memórias Póstumas de Brás Cubas', autor: 'Machado de Assis', disponivel: false },
-    { titulo: 'O Cortiço', autor: 'Aluísio Azevedo', disponivel: true },
+    { titulo: 'Dom Casmurro', autor: 'Machado de Assis', disponivel: true, linkImagem: 'https://m.media-amazon.com/images/I/61x1ZHomWUL.jpg'},
+    { titulo: 'Capitães da Areia', autor: 'Jorge Amado', disponivel: false, linkImagem: 'https://m.media-amazon.com/images/I/81t7altQZxL.jpg' },
+    { titulo: 'A Hora da Estrela', autor: 'Clarice Lispector', disponivel: true, linkImagem: 'https://m.media-amazon.com/images/I/61TaHURu27L._AC_UF1000,1000_QL80_.jpg' },
+    { titulo: 'Grande Sertão: Veredas', autor: 'João Guimarães Rosa', disponivel: true, linkImagem: 'https://m.media-amazon.com/images/I/81NtboFZziL.jpg'},
+    { titulo: 'Memórias Póstumas de Brás Cubas', autor: 'Machado de Assis', disponivel: false, linkImagem: 'https://m.media-amazon.com/images/I/91GAAzBixYL._UF1000,1000_QL80_.jpg'},
+    { titulo: 'O Cortiço', autor: 'Aluísio Azevedo', disponivel: true, linkImagem: 'https://m.media-amazon.com/images/I/61hI7QLrTkL._AC_UF1000,1000_QL80_.jpg'},
   ];
 
   for (const livro of livros) {

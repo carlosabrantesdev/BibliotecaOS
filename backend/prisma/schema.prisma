@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,6 +14,7 @@ model Usuario {
   role      String   @default("user")
   nome      String
   criadoEm DateTime @default(now()) @map("criado_em")
+  reservas Reserva[]
 
   @@map("usuarios")
 }
@@ -22,8 +23,22 @@ model Livro {
   id         Int      @id @default(autoincrement())
   titulo     String
   autor      String
+  linkImagem String
   disponivel Boolean  @default(true)
   criadoEm  DateTime @default(now()) @map("criado_em")
+  reservas   Reserva[]
 
   @@map("livros")
 }
+
+model Reserva {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int
+  livroId    Int
+  status     String   @default("ATIVA") // ATIVA, CONCLUIDA, CANCELADA
+  dataReserva DateTime @default(now()) @map("data_reserva")
+  dataPrazo   DateTime @map("data_prazo")
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  livro      Livro    @relation(fields: [livroId], references: [id])
+
+  @@map("reservas")

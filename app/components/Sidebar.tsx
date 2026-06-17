@@ -26,7 +26,6 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const userRoutes = [
     { path: '/explorar', icon: 'explore', label: 'Explorar' },
     { path: '/reservas', icon: 'event', label: 'Reservas' },
-    { path: '/favoritos', icon: 'favorite', label: 'Favoritos' },
   ];
 
   // Determine which routes to show based on role
