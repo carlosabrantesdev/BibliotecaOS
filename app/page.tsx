@@ -77,7 +77,7 @@ export default function Home() {
             <header className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-black text-[32px]">local_library</span>
-                <h1 className="text-3xl font-bold text-black tracking-tight">Biblioteca</h1>
+                <h1 className="text-3xl font-bold text-black tracking-tight">BibliotecaOS</h1>
               </div>
               <h2 className="text-2xl font-semibold text-[#191c1e]">
                 {isLogin ? 'Bem-vindo ao Portal do Leitor' : 'Crie sua Conta de Leitor'}
@@ -88,14 +88,6 @@ export default function Home() {
                   : 'Junte-se à nossa comunidade e comece a explorar nosso acervo digital agora mesmo.'}
               </p>
             </header>
-
-            {isLogin && (
-              <div className="bg-[#e6f0ff] border border-[#c6d7ff] rounded-sm p-4 text-sm">
-                <p className="font-semibold mb-2">Credenciais de teste:</p>
-                <p><strong>Administrador:</strong> admin@biblioteca.com / admin123</p>
-                <p><strong>Usuário:</strong> usuario@biblioteca.com / usuario123</p>
-              </div>
-            )}
 
             {/* Formulário */}
             <form className="flex flex-col gap-6" onSubmit={handleSubmit}>

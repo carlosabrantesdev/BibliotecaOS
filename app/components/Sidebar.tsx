@@ -19,7 +19,6 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     { path: '/catalogo', icon: 'menu_book', label: 'Catálogo' },
     { path: '/emprestimos', icon: 'swap_horiz', label: 'Empréstimos' },
     { path: '/leitores', icon: 'group', label: 'Leitores' },
-    { path: '/relatorios', icon: 'analytics', label: 'Relatórios' },
   ];
 
   // User routes
@@ -34,7 +33,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   return (
     <nav className={`${isOpen ? 'flex' : 'hidden'} flex-col h-screen w-64 bg-[#f2f4f6] border-r border-[#c6c6cd] py-2 flex-shrink-0 sticky top-0 transition-all duration-300`}>
       <div className="px-6 mb-12 pt-2">
-        <h1 className="text-xl font-bold text-black">Biblioteca</h1>
+        <h1 className="text-xl font-bold text-black">BibliotecaOS</h1>
         <p className="text-xs text-[#45464d] uppercase tracking-widest mt-1">
           {role === 'admin' ? 'ADMINISTRAÇÃO' : 'PORTAL DO LEITOR'}
         </p>

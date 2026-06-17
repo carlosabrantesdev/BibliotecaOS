@@ -5,6 +5,7 @@ import livrosRoutes from './routes/livros';
 import reservasRoutes from './routes/reservas';
 import dashboardRoutes from './routes/dashboard';
 import usuariosRoutes from './routes/usuarios';
+import { emprestimoRouter as emprestimosRoutes } from './routes/emprestimos';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -17,6 +18,7 @@ app.use('/api/livros', livrosRoutes);
 app.use('/api/reservas', reservasRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/emprestimos', emprestimosRoutes);
 
 app.get('/api/health', (_, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const COVER_PLACEHOLDER = 'https://image.slidesdocs.com/responsive-images/background/empty-book-cover-presented-in-3d-on-a-white-backdrop-powerpoint-background_31314acd44__960_540.jpg';
@@ -15,6 +16,7 @@ interface Livro {
 }
 
 export default function DetalhesPage() {
+  const { role } = useAuth();
   const params = useParams();
   const router = useRouter();
   const [livro, setLivro] = useState<Livro | null>(null);
@@ -137,17 +139,19 @@ export default function DetalhesPage() {
             </div>
 
             <div className="mt-auto pt-8 flex flex-col sm:flex-row gap-4">
-              <button 
-                disabled={!livro.disponivel}
-                onClick={handleReservar}
-                className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${
-                  livro.disponivel 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95' 
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {livro.disponivel ? 'Reservar Agora' : 'Indisponível'}
-              </button>
+              {role !== 'admin' && (
+                <button 
+                  disabled={!livro.disponivel}
+                  onClick={handleReservar}
+                  className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${
+                    livro.disponivel 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95' 
+                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {livro.disponivel ? 'Reservar Agora' : 'Indisponível'}
+                </button>
+              )}
             </div>
           </div>
         </div>
