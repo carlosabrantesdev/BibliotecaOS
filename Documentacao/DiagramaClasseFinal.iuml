@@ -1,0 +1,303 @@
+@startuml
+title Diagrama de Classes de Projeto - Backend BibliotecaOS
+
+top to bottom direction
+
+class Server {
+  +registrarRotas()
+  +healthCheck()
+}
+
+class AuthController <<Controller>> {
+  +login(email: string, senha: string)
+  +register(nome: string, email: string, senha: string)
+  +logout()
+}
+
+class LivroController <<Controller>> {
+  +listarLivros()
+  +listarDisponiveis()
+  +buscarLivroPorId(id: number)
+  +criarLivro(titulo: string, autor: string, linkImagem?: string, disponivel?: boolean)
+  +atualizarLivro(id: number, titulo?: string, autor?: string, linkImagem?: string, disponivel?: boolean)
+  +deletarLivro(id: number)
+}
+
+class ReservaController <<Controller>> {
+  +criarReserva(usuarioId: number, livroId: number)
+  +listarMinhasReservas(usuarioId: number)
+  +confirmarRetirada(id: number)
+  +cancelarReserva(id: number)
+}
+
+class UsuarioController <<Controller>> {
+  +listarUsuarios()
+  +criarUsuario(nome: string, email: string, senha: string, role?: string)
+  +deletarUsuario(id: number, authUserId: number)
+}
+
+class EmprestimoController <<Controller>> {
+  +listarEmprestimos()
+  +criarEmprestimo(usuarioId: number, livroId: number, dataPrazo: Date)
+  +concluirEmprestimo(id: number)
+}
+
+class DashboardController <<Controller>> {
+  +buscarEstatisticas()
+}
+
+class AuthMiddleware <<Middleware>> {
+  +autenticar(req, res, next): void
+}
+
+class AuthRequest <<DTO>> {
+  +usuario?: UsuarioToken
+}
+
+class UsuarioToken <<DTO>> {
+  +id: number
+  +email: string
+  +role: string
+}
+
+class AutenticacaoService <<Service>> {
+  +login(email: string, senha: string): TokenPayload
+  +registrar(nome: string, email: string, senha: string): TokenPayload
+}
+
+class LivroService <<Service>> {
+  +listar(): Livro[]
+  +listarDisponiveis(): Livro[]
+  +buscarPorId(id: number): Livro
+  +criarLivro(dados: LivroInput): Livro
+  +atualizarLivro(id: number, dados: LivroUpdateInput): Livro
+  +deletarLivro(id: number): Livro
+}
+
+class ReservaService <<Service>> {
+  +reservar(usuarioId: number, livroId: number): Reserva
+  +listarMinhasReservas(usuarioId: number): Reserva[]
+  +confirmarRetirada(reservaId: number): Reserva
+  +cancelarReserva(reservaId: number): Reserva
+}
+
+class UsuarioService <<Service>> {
+  +criarUsuario(dados: UsuarioInput): Usuario
+  +deletarUsuario(id: number): Usuario
+}
+
+class EmprestimoService <<Service>> {
+  +listAll(): Reserva[]
+  +create(data: EmprestimoInput): Reserva
+  +getStats(): EmprestimoStats
+  +conclude(id: number): Reserva
+}
+
+class DashboardService <<Service>> {
+  +getStats(): DashboardStats
+}
+
+class UsuarioRepository <<Repository>> {
+  +buscarPorEmail(email: string): Usuario
+  +criar(dados: UsuarioInput): Usuario
+  +deletar(id: number): Usuario
+}
+
+class LivroRepository <<Repository>> {
+  +listarTodos(): Livro[]
+  +listarDisponiveis(): Livro[]
+  +buscarPorId(id: number): Livro
+  +criar(dados: LivroInput): Livro
+  +atualizar(id: number, dados: LivroUpdateInput): Livro
+  +deletar(id: number): Livro
+}
+
+class ReservaRepository <<Repository>> {
+  +criar(data: ReservaInput): Reserva
+  +listarPorUsuario(usuarioId: number): Reserva[]
+  +atualizarStatus(id: number, status: string): Reserva
+  +cancelar(id: number): Reserva
+}
+
+class EmprestimoRepository <<Repository>> {
+  +findAll(): Reserva[]
+  +create(data: EmprestimoInput): Reserva
+  +findStats(): EmprestimoStats
+  +conclude(id: number): Reserva
+}
+
+class DashboardRepository <<Repository>> {
+  +getTotalLivros(): number
+  +getTotalUsuarios(): number
+  +getEmprestimosAtivos(): number
+  +getDevolucoesAtrasadas(): number
+  +getDashboardStats(): DashboardStats
+}
+
+class Usuario <<Entity>> {
+  +id: Int
+  +email: String
+  +senha: String
+  +role: String
+  +nome: String
+  +criadoEm: DateTime
+}
+
+class Livro <<Entity>> {
+  +id: Int
+  +titulo: String
+  +autor: String
+  +linkImagem: String
+  +disponivel: Boolean
+  +criadoEm: DateTime
+}
+
+class Reserva <<Entity>> {
+  +id: Int
+  +usuarioId: Int
+  +livroId: Int
+  +status: String
+  +dataReserva: DateTime
+  +dataPrazo: DateTime
+}
+
+class TokenPayload <<DTO>> {
+  +token: string
+  +role: string
+  +nome: string
+}
+
+class UsuarioInput <<DTO>> {
+  +nome: string
+  +email: string
+  +senha: string
+  +role: string
+}
+
+class LivroInput <<DTO>> {
+  +titulo: string
+  +autor: string
+  +linkImagem?: string
+  +disponivel: boolean
+}
+
+class LivroUpdateInput <<DTO>> {
+  +titulo?: string
+  +autor?: string
+  +linkImagem?: string
+  +disponivel?: boolean
+}
+
+class ReservaInput <<DTO>> {
+  +usuarioId: number
+  +livroId: number
+  +dataPrazo: Date
+}
+
+class EmprestimoInput <<DTO>> {
+  +usuarioId: number
+  +livroId: number
+  +dataPrazo: Date
+}
+
+class EmprestimoStats <<DTO>> {
+  +totalAtivos: number
+  +venceHoje: number
+  +atrasados: number
+}
+
+class DashboardStats <<DTO>> {
+  +totalLivros: number
+  +totalUsuarios: number
+  +emprestimosAtivos: number
+  +devolucoesAtrasadas: number
+}
+
+class PrismaClient <<ORM>>
+class JWT <<External>>
+class Bcrypt <<External>>
+
+Usuario "1" --> "0..*" Reserva
+Livro "1" --> "0..*" Reserva
+
+AuthRequest --> UsuarioToken
+
+Server ..> AuthController
+Server ..> LivroController
+Server ..> ReservaController
+Server ..> UsuarioController
+Server ..> EmprestimoController
+Server ..> DashboardController
+
+AuthController --> AutenticacaoService
+LivroController --> LivroService
+ReservaController --> ReservaService
+UsuarioController --> UsuarioService
+UsuarioController --> PrismaClient
+EmprestimoController --> EmprestimoService
+DashboardController --> DashboardService
+
+LivroController ..> AuthMiddleware
+ReservaController ..> AuthMiddleware
+UsuarioController ..> AuthMiddleware
+EmprestimoController ..> AuthMiddleware
+DashboardController ..> AuthMiddleware
+
+AuthMiddleware ..> AuthRequest
+AuthMiddleware ..> JWT
+
+AutenticacaoService --> UsuarioRepository
+LivroService --> LivroRepository
+ReservaService --> ReservaRepository
+ReservaService --> LivroRepository
+ReservaService --> PrismaClient
+UsuarioService --> UsuarioRepository
+EmprestimoService --> EmprestimoRepository
+DashboardService --> DashboardRepository
+
+UsuarioRepository --> PrismaClient
+LivroRepository --> PrismaClient
+ReservaRepository --> PrismaClient
+EmprestimoRepository --> PrismaClient
+DashboardRepository --> PrismaClient
+
+UsuarioRepository ..> Usuario
+UsuarioRepository ..> Reserva
+
+LivroRepository ..> Livro
+
+ReservaRepository ..> Reserva
+ReservaRepository ..> Livro
+
+EmprestimoRepository ..> Reserva
+EmprestimoRepository ..> Livro
+
+DashboardRepository ..> Usuario
+DashboardRepository ..> Livro
+DashboardRepository ..> Reserva
+
+AutenticacaoService ..> TokenPayload
+UsuarioService ..> UsuarioInput
+UsuarioRepository ..> UsuarioInput
+
+LivroController ..> LivroInput
+LivroController ..> LivroUpdateInput
+LivroService ..> LivroInput
+LivroService ..> LivroUpdateInput
+LivroRepository ..> LivroInput
+LivroRepository ..> LivroUpdateInput
+
+ReservaService ..> ReservaInput
+ReservaRepository ..> ReservaInput
+
+EmprestimoController ..> EmprestimoInput
+EmprestimoService ..> EmprestimoInput
+EmprestimoRepository ..> EmprestimoInput
+EmprestimoRepository ..> EmprestimoStats
+
+DashboardRepository ..> DashboardStats
+
+AutenticacaoService ..> Bcrypt
+AutenticacaoService ..> JWT
+
+@enduml
